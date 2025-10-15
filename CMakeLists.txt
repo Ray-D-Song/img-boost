@@ -1,0 +1,56 @@
+cmake_minimum_required(VERSION 3.15)
+project(img-boost VERSION 1.0.0 LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+option(BUILD_STATIC "Build with static libraries" ON)
+
+if(BUILD_STATIC)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+    set(BUILD_SHARED_LIBS OFF)
+    # macOS not support -static-libgcc
+    if(NOT APPLE)
+        set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+    endif()
+endif()
+
+set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third_party)
+
+# OpenSSL for HTTPS support
+find_package(OpenSSL REQUIRED)
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src
+    ${THIRD_PARTY_DIR}/include
+    ${OPENSSL_INCLUDE_DIR}
+)
+
+link_directories(
+    ${THIRD_PARTY_DIR}/lib
+)
+
+set(SOURCES
+    src/main.cpp
+    src/image_processor.cpp
+)
+
+add_executable(img-boost ${SOURCES})
+
+target_compile_definitions(img-boost PRIVATE CPPHTTPLIB_OPENSSL_SUPPORT)
+
+target_link_libraries(img-boost
+    webp
+    webpdemux
+    webpdecoder
+    sharpyuv
+    jpeg
+    png16
+    z
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    pthread
+)
+
+install(TARGETS img-boost DESTINATION bin)

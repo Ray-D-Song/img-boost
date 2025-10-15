@@ -1,0 +1,14 @@
+build/
+build_deps/
+third_party/
+*.o
+*.a
+*.so
+*.dylib
+img-boost
+.DS_Store
+.vscode/
+.idea/
+cmake-build-*/
+compile_commands.json
+.clangd
