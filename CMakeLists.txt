@@ -28,15 +28,33 @@ set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third_party)
 # OpenSSL for HTTPS support
 find_package(OpenSSL REQUIRED)
 
-include_directories(
-    ${CMAKE_SOURCE_DIR}/src
-    ${THIRD_PARTY_DIR}/include
-    ${OPENSSL_INCLUDE_DIR}
-)
+# On Windows with vcpkg, use find_package for other libraries
+if(WIN32 AND DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg")
+    find_package(WebP CONFIG REQUIRED)
+    find_package(JPEG REQUIRED)
+    find_package(PNG REQUIRED)
+    find_package(ZLIB REQUIRED)
+    set(USE_VCPKG TRUE)
+else()
+    # Unix: use manually built libraries
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/src
+        ${THIRD_PARTY_DIR}/include
+        ${OPENSSL_INCLUDE_DIR}
+    )
 
-link_directories(
-    ${THIRD_PARTY_DIR}/lib
-)
+    link_directories(
+        ${THIRD_PARTY_DIR}/lib
+    )
+    set(USE_VCPKG FALSE)
+endif()
+
+if(USE_VCPKG)
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/src
+        ${OPENSSL_INCLUDE_DIR}
+    )
+endif()
 
 set(SOURCES
     src/main.cpp
@@ -47,17 +65,33 @@ add_executable(img-boost ${SOURCES})
 
 target_compile_definitions(img-boost PRIVATE CPPHTTPLIB_OPENSSL_SUPPORT)
 
-target_link_libraries(img-boost
-    webp
-    webpdemux
-    webpdecoder
-    sharpyuv
-    jpeg
-    png16
-    z
-    OpenSSL::SSL
-    OpenSSL::Crypto
-)
+if(USE_VCPKG)
+    # vcpkg libraries (Windows)
+    target_link_libraries(img-boost
+        WebP::webp
+        WebP::webpdemux
+        WebP::libwebpdecoder
+        WebP::sharpyuv
+        JPEG::JPEG
+        PNG::PNG
+        ZLIB::ZLIB
+        OpenSSL::SSL
+        OpenSSL::Crypto
+    )
+else()
+    # Manually built libraries (Unix)
+    target_link_libraries(img-boost
+        webp
+        webpdemux
+        webpdecoder
+        sharpyuv
+        jpeg
+        png16
+        z
+        OpenSSL::SSL
+        OpenSSL::Crypto
+    )
+endif()
 
 # Add pthread on Unix-like systems only
 if(NOT WIN32)
