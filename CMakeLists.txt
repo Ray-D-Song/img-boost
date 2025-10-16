@@ -52,6 +52,7 @@ endif()
 if(USE_VCPKG)
     include_directories(
         ${CMAKE_SOURCE_DIR}/src
+        ${THIRD_PARTY_DIR}/include
         ${OPENSSL_INCLUDE_DIR}
     )
 endif()
@@ -70,7 +71,6 @@ if(USE_VCPKG)
     target_link_libraries(img-boost
         WebP::webp
         WebP::webpdemux
-        WebP::libwebpdecoder
         WebP::sharpyuv
         JPEG::JPEG
         PNG::PNG
