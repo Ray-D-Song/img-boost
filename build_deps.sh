@@ -26,6 +26,7 @@ mkdir -p "${PREFIX}"
 LIBPNG_VERSION="1.6.43"
 LIBJPEG_TURBO_VERSION="2.1.5.1"
 LIBWEBP_VERSION="1.3.2"
+CPPHTTPLIB_VERSION="0.18.3"
 
 NPROC=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
 
@@ -115,6 +116,15 @@ if [ ! -f "${PREFIX}/lib/libwebp.a" ]; then
     cd ../..
 else
     echo_info "libwebp: skipped (exists)"
+fi
+
+# cpp-httplib (header-only HTTP server)
+if [ ! -f "${PREFIX}/include/httplib.h" ]; then
+    echo_info "Downloading cpp-httplib ${CPPHTTPLIB_VERSION}..."
+    curl -L "https://raw.githubusercontent.com/yhirose/cpp-httplib/v${CPPHTTPLIB_VERSION}/httplib.h" \
+        -o "${PREFIX}/include/httplib.h"
+else
+    echo_info "cpp-httplib: skipped (exists)"
 fi
 
 echo_info "Done. Libraries installed to: ${PREFIX}/lib"

@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+build/
+build_deps/
+*.o
+*.a
+*.so
+
+# Documentation
+*.md
+README*
+LICENSE
+
+# CI/CD
+.github/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.log
+*.tmp

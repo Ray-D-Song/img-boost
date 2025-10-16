@@ -8,11 +8,18 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(BUILD_STATIC "Build with static libraries" ON)
 
 if(BUILD_STATIC)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-    set(BUILD_SHARED_LIBS OFF)
-    # macOS not support -static-libgcc
-    if(NOT APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+    if(WIN32)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a)
+        set(BUILD_SHARED_LIBS OFF)
+        # Use static runtime on Windows
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    else()
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+        set(BUILD_SHARED_LIBS OFF)
+        # macOS not support -static-libgcc
+        if(NOT APPLE)
+            set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+        endif()
     endif()
 endif()
 
@@ -50,7 +57,16 @@ target_link_libraries(img-boost
     z
     OpenSSL::SSL
     OpenSSL::Crypto
-    pthread
 )
+
+# Add pthread on Unix-like systems only
+if(NOT WIN32)
+    target_link_libraries(img-boost pthread)
+endif()
+
+# Windows specific libraries
+if(WIN32)
+    target_link_libraries(img-boost ws2_32 crypt32)
+endif()
 
 install(TARGETS img-boost DESTINATION bin)
